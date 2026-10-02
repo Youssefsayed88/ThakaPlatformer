@@ -42,7 +42,7 @@ namespace Thaka.Platformer.Core
 
         public static void ReturnToMainMenu()
         {
-            SceneManager.LoadScene(SceneNames.MainMenu);
+            LoadScene(SceneNames.MainMenu);
         }
 
         public static void Quit()
@@ -57,7 +57,14 @@ namespace Thaka.Platformer.Core
         static void LoadLevel(LaunchMode mode)
         {
             PendingLaunch = mode;
-            SceneManager.LoadScene(SceneNames.Level);
+            LoadScene(SceneNames.Level);
+        }
+
+        static void LoadScene(string sceneName)
+        {
+            // A scene change must never leave the game paused
+            Time.timeScale = 1f;
+            SceneManager.LoadScene(sceneName);
         }
 
         // Needed when domain reload is disabled

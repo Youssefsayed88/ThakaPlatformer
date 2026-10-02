@@ -1,3 +1,5 @@
+using System;
+using System.Collections;
 using Thaka.Platformer.Collectibles;
 using Thaka.Platformer.Config;
 using Thaka.Platformer.Core;
@@ -15,11 +17,15 @@ namespace Thaka.Platformer.Session
     {
         [SerializeField] PlayerConfig playerConfig;
         [SerializeField] PlayerMotor player;
+        [SerializeField, Min(0f)] float levelCompleteDelaySeconds = 2.5f;
 
         SaveData loadedSnapshot;
         Checkpoint[] checkpoints;
 
+        public event Action LevelCompleted;
+
         public LevelState State { get; private set; }
+        public int TotalCoins { get; private set; }
 
         void Awake()
         {
@@ -75,7 +81,10 @@ namespace Thaka.Platformer.Session
 
         void BindCoins()
         {
-            foreach (var coin in FindObjectsByType<Coin>(FindObjectsSortMode.None))
+            var coins = FindObjectsByType<Coin>(FindObjectsSortMode.None);
+            TotalCoins = coins.Length;
+
+            foreach (var coin in coins)
             {
                 if (State.IsCoinCollected(coin.Id))
                     coin.gameObject.SetActive(false);
@@ -129,7 +138,24 @@ namespace Thaka.Platformer.Session
         void BindGoals()
         {
             foreach (var goal in FindObjectsByType<LevelGoal>(FindObjectsSortMode.None))
-                goal.Reached += GameFlow.CompleteLevel;
+                goal.Reached += OnGoalReached;
+        }
+
+        void OnGoalReached()
+        {
+            // Freeze the player and ignore deaths so nothing can interrupt the completion screen
+            State.Died -= GameFlow.RespawnAtLastCheckpoint;
+            player.enabled = false;
+            player.GetComponent<PlayerContactSensor>().enabled = false;
+
+            LevelCompleted?.Invoke();
+            StartCoroutine(CompleteAfterDelay());
+        }
+
+        IEnumerator CompleteAfterDelay()
+        {
+            yield return new WaitForSeconds(levelCompleteDelaySeconds);
+            GameFlow.CompleteLevel();
         }
 
         void Save(Vector3 playerPosition)
