@@ -46,6 +46,15 @@ namespace Thaka.Platformer.Player
             UpdateFacing();
         }
 
+        public void Teleport(Vector3 position, float yaw)
+        {
+            // CharacterController overwrites transform changes while enabled
+            controller.enabled = false;
+            transform.SetPositionAndRotation(position, Quaternion.Euler(0f, yaw, 0f));
+            controller.enabled = true;
+            velocity = Vector3.zero;
+        }
+
         void UpdateHorizontal()
         {
             var target = input.Move * config.MoveSpeed;

@@ -1,12 +1,18 @@
 using Thaka.Platformer.Core;
+using Thaka.Platformer.Persistence;
+using Thaka.Platformer.Player;
 using UnityEngine;
 
 namespace Thaka.Platformer.Session
 {
+    // Runs before other scripts so the state exists in their Awake and the player is placed before the camera snaps
     [DefaultExecutionOrder(-100)]
     public class GameSession : MonoBehaviour
     {
         [SerializeField, Min(1)] int maxHp = 4;
+        [SerializeField] PlayerMotor player;
+
+        SaveData loadedSnapshot;
 
         public LevelState State { get; private set; }
 
@@ -15,12 +21,18 @@ namespace Thaka.Platformer.Session
             State = new LevelState(maxHp);
 
             var launch = GameFlow.PendingLaunch;
-            if (launch != LaunchMode.NewGame && GameFlow.SaveService.TryLoad(out var snapshot))
-                State.Restore(snapshot, restoreHp: launch == LaunchMode.Continue);
-            else
-                SaveCheckpoint(null);
+            if (launch != LaunchMode.NewGame && GameFlow.SaveService.TryLoad(out loadedSnapshot))
+                State.Restore(loadedSnapshot, restoreHp: launch == LaunchMode.Continue);
 
             State.Died += GameFlow.RespawnAtLastCheckpoint;
+        }
+
+        void Start()
+        {
+            if (loadedSnapshot != null)
+                player.Teleport(loadedSnapshot.playerPosition, loadedSnapshot.playerYaw);
+            else
+                SaveCheckpoint(null);
         }
 
         void OnDestroy()
@@ -31,8 +43,8 @@ namespace Thaka.Platformer.Session
         public void SaveCheckpoint(string checkpointId)
         {
             State.SetCheckpoint(checkpointId);
-            // TODO: pass the player's position once the player exists
-            GameFlow.SaveService.Save(State.CreateSnapshot(Vector3.zero, 0f));
+            var playerTransform = player.transform;
+            GameFlow.SaveService.Save(State.CreateSnapshot(playerTransform.position, playerTransform.eulerAngles.y));
         }
 
         public void CompleteLevel()
