@@ -1,0 +1,28 @@
+Third-party assets used in this project
+=======================================
+
+Everything else (code, level, materials, UI) was made for this project.
+All of the assets below are CC0 (public domain), so credit isn't required,
+but I'm listing them anyway so it's clear where they came from.
+
+
+Characters - "Animated Characters 2" by Kenney
+  https://opengameart.org/content/animated-characters-2
+  https://www.kenney.nl
+  - Used: characterMedium.fbx, the idle / run / jump animations, and 3 of the 4 skins
+    (skaterMaleA for the player, criminalMaleA for patrollers, cyborgFemaleA for chasers)
+  - Enemies are the same model scaled down to fit their colliders
+  - Original license file: Art/Characters/License.txt
+
+
+Sound effects - "The Essential Retro Video Game Sound Effects Collection [512 sounds]" by Juhani Junkala
+  https://opengameart.org/content/512-sound-effects-8-bit-style
+  - Picked 7 out of the 512:
+      jump            sfx_movement_jump1
+      coin            sfx_coin_single2
+      stomp           sfx_sounds_impact2
+      hurt            sfx_sounds_damage1
+      death           sfx_sounds_negative2
+      checkpoint      sfx_sounds_powerup3
+      level complete  sfx_sounds_fanfare1
+  - Original info/license file: Audio/INFO.txt

@@ -1,3 +1,5 @@
+using System;
+using System.Collections;
 using Thaka.Platformer.Collectibles;
 using Thaka.Platformer.Config;
 using Thaka.Platformer.Core;
@@ -15,11 +17,17 @@ namespace Thaka.Platformer.Session
     {
         [SerializeField] PlayerConfig playerConfig;
         [SerializeField] PlayerMotor player;
+        [SerializeField, Min(0f)] float levelCompleteDelaySeconds = 2.5f;
+        [SerializeField, Min(0f)] float respawnDelaySeconds = 0.8f;
 
         SaveData loadedSnapshot;
         Checkpoint[] checkpoints;
 
+        public event Action CheckpointReached;
+        public event Action LevelCompleted;
+
         public LevelState State { get; private set; }
+        public int TotalCoins { get; private set; }
 
         void Awake()
         {
@@ -29,7 +37,7 @@ namespace Thaka.Platformer.Session
             if (GameFlow.PendingLaunch == LaunchMode.Continue && GameFlow.SaveService.TryLoad(out loadedSnapshot))
                 State.Restore(loadedSnapshot);
 
-            State.Died += GameFlow.RespawnAtLastCheckpoint;
+            State.Died += OnPlayerDied;
         }
 
         void Start()
@@ -48,7 +56,13 @@ namespace Thaka.Platformer.Session
 
         void OnDestroy()
         {
-            State.Died -= GameFlow.RespawnAtLastCheckpoint;
+            State.Died -= OnPlayerDied;
+        }
+
+        void OnPlayerDied()
+        {
+            FreezePlayer();
+            StartCoroutine(AfterDelay(respawnDelaySeconds, GameFlow.RespawnAtLastCheckpoint));
         }
 
         void BindEnemies()
@@ -75,7 +89,10 @@ namespace Thaka.Platformer.Session
 
         void BindCoins()
         {
-            foreach (var coin in FindObjectsByType<Coin>(FindObjectsSortMode.None))
+            var coins = FindObjectsByType<Coin>(FindObjectsSortMode.None);
+            TotalCoins = coins.Length;
+
+            foreach (var coin in coins)
             {
                 if (State.IsCoinCollected(coin.Id))
                     coin.gameObject.SetActive(false);
@@ -109,6 +126,7 @@ namespace Thaka.Platformer.Session
             MarkReachedUpTo(checkpoint.X);
             State.SetCheckpoint(checkpoint.Id);
             Save(checkpoint.SpawnPosition);
+            CheckpointReached?.Invoke();
         }
 
         void MarkReachedUpTo(float x)
@@ -129,7 +147,29 @@ namespace Thaka.Platformer.Session
         void BindGoals()
         {
             foreach (var goal in FindObjectsByType<LevelGoal>(FindObjectsSortMode.None))
-                goal.Reached += GameFlow.CompleteLevel;
+                goal.Reached += OnGoalReached;
+        }
+
+        void OnGoalReached()
+        {
+            // Ignore deaths so nothing can interrupt the completion screen
+            State.Died -= OnPlayerDied;
+            FreezePlayer();
+
+            LevelCompleted?.Invoke();
+            StartCoroutine(AfterDelay(levelCompleteDelaySeconds, GameFlow.CompleteLevel));
+        }
+
+        void FreezePlayer()
+        {
+            player.enabled = false;
+            player.GetComponent<PlayerContactSensor>().enabled = false;
+        }
+
+        IEnumerator AfterDelay(float seconds, Action action)
+        {
+            yield return new WaitForSeconds(seconds);
+            action();
         }
 
         void Save(Vector3 playerPosition)

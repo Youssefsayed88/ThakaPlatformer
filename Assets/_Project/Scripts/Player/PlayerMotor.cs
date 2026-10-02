@@ -1,3 +1,4 @@
+using System;
 using Thaka.Platformer.AI;
 using Thaka.Platformer.Config;
 using UnityEngine;
@@ -18,6 +19,9 @@ namespace Thaka.Platformer.Player
         float lastGroundedTime = float.NegativeInfinity;
         float lastJumpPressedTime = float.NegativeInfinity;
         float controlLockedUntil = float.NegativeInfinity;
+
+        public event Action Jumped;
+        public event Action Bounced;
 
         public Vector3 Position => transform.position;
         public Vector3 Velocity => velocity;
@@ -64,6 +68,7 @@ namespace Thaka.Platformer.Player
             velocity.y = Mathf.Sqrt(2f * height * -config.Gravity);
             lastGroundedTime = float.NegativeInfinity;
             lastJumpPressedTime = float.NegativeInfinity;
+            Bounced?.Invoke();
         }
 
         public void ApplyKnockback(float directionX)
@@ -96,6 +101,7 @@ namespace Thaka.Platformer.Player
                 velocity.y = Mathf.Sqrt(2f * config.JumpHeight * -config.Gravity);
                 lastGroundedTime = float.NegativeInfinity;
                 lastJumpPressedTime = float.NegativeInfinity;
+                Jumped?.Invoke();
             }
 
             var gravity = config.Gravity;
