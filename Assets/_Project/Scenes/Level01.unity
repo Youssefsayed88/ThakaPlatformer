@@ -1229,7 +1229,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d1849df9f7560ad4caae41a3d4c1b53b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxHp: 4
+  playerConfig: {fileID: 11400000, guid: 22d000ea3c1c81547b36a3085a6447e7, type: 2}
   player: {fileID: 5827343960470359601}
 --- !u!114 &1035414153
 MonoBehaviour:
@@ -1244,6 +1244,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   session: {fileID: 1035414152}
+  playerHealth: {fileID: 5827343960470359602}
 --- !u!4 &1035414154
 Transform:
   m_ObjectHideFlags: 0
@@ -2177,6 +2178,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Player
       objectReference: {fileID: 0}
+    - target: {fileID: 6588515163596745375, guid: d80f600ad5bc89a4ab91ea3440c31894, type: 3}
+      propertyPath: session
+      value: 
+      objectReference: {fileID: 1035414152}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -2196,6 +2201,17 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 23303c44539c7684fb08e48d2035a51e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &5827343960470359602 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 6588515163596745375, guid: d80f600ad5bc89a4ab91ea3440c31894, type: 3}
+  m_PrefabInstance: {fileID: 5827343960470359599}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 15e3b43cca498634481def3ae2b58def, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!1660057539 &9223372036854775807

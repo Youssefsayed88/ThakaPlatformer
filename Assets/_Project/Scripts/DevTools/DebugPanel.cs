@@ -1,5 +1,6 @@
 using System;
 using Thaka.Platformer.Core;
+using Thaka.Platformer.Player;
 using Thaka.Platformer.Session;
 using UnityEngine;
 
@@ -9,6 +10,7 @@ namespace Thaka.Platformer.DevTools
     public class DebugPanel : MonoBehaviour
     {
         [SerializeField] GameSession session;
+        [SerializeField] PlayerHealth playerHealth;
 
         void Awake()
         {
@@ -25,7 +27,7 @@ namespace Thaka.Platformer.DevTools
             GUILayout.Label("Debug");
 
             if (GUILayout.Button("Take Hit"))
-                session.State.TakeHit();
+                HitPlayerFromFront();
             if (GUILayout.Button("Collect Coin"))
                 session.State.TryCollectCoin(Guid.NewGuid().ToString("N"));
             if (GUILayout.Button("Reach Checkpoint"))
@@ -36,6 +38,12 @@ namespace Thaka.Platformer.DevTools
                 GameFlow.ReturnToMainMenu();
 
             GUILayout.EndArea();
+        }
+
+        void HitPlayerFromFront()
+        {
+            var player = playerHealth.transform;
+            playerHealth.TryTakeHit(1, player.position + player.forward);
         }
     }
 }

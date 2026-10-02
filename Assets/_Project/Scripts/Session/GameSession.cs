@@ -1,3 +1,4 @@
+using Thaka.Platformer.Config;
 using Thaka.Platformer.Core;
 using Thaka.Platformer.Persistence;
 using Thaka.Platformer.Player;
@@ -9,7 +10,7 @@ namespace Thaka.Platformer.Session
     [DefaultExecutionOrder(-100)]
     public class GameSession : MonoBehaviour
     {
-        [SerializeField, Min(1)] int maxHp = 4;
+        [SerializeField] PlayerConfig playerConfig;
         [SerializeField] PlayerMotor player;
 
         SaveData loadedSnapshot;
@@ -18,7 +19,7 @@ namespace Thaka.Platformer.Session
 
         void Awake()
         {
-            State = new LevelState(maxHp);
+            State = new LevelState(playerConfig.MaxHp);
 
             var launch = GameFlow.PendingLaunch;
             if (launch != LaunchMode.NewGame && GameFlow.SaveService.TryLoad(out loadedSnapshot))

@@ -16,9 +16,11 @@ namespace Thaka.Platformer.Player
         float laneZ;
         float lastGroundedTime = float.NegativeInfinity;
         float lastJumpPressedTime = float.NegativeInfinity;
+        float controlLockedUntil = float.NegativeInfinity;
 
         public Vector3 Velocity => velocity;
         public bool IsGrounded => controller.isGrounded;
+        bool IsControlLocked => Time.time < controlLockedUntil;
 
         void Awake()
         {
@@ -55,8 +57,19 @@ namespace Thaka.Platformer.Player
             velocity = Vector3.zero;
         }
 
+        public void ApplyKnockback(float directionX)
+        {
+            velocity.x = Mathf.Sign(directionX) * config.KnockbackSpeed;
+            velocity.y = config.KnockbackUpSpeed;
+            controlLockedUntil = Time.time + config.KnockbackControlLockSeconds;
+            lastJumpPressedTime = float.NegativeInfinity;
+        }
+
         void UpdateHorizontal()
         {
+            if (IsControlLocked)
+                return;
+
             var target = input.Move * config.MoveSpeed;
             var acceleration = controller.isGrounded ? config.GroundAcceleration : config.AirAcceleration;
             velocity.x = Mathf.MoveTowards(velocity.x, target, acceleration * Time.deltaTime);
@@ -69,7 +82,7 @@ namespace Thaka.Platformer.Player
 
             var canJump = Time.time - lastGroundedTime <= config.CoyoteTime;
             var wantsJump = Time.time - lastJumpPressedTime <= config.JumpBufferTime;
-            if (canJump && wantsJump)
+            if (canJump && wantsJump && !IsControlLocked)
             {
                 velocity.y = Mathf.Sqrt(2f * config.JumpHeight * -config.Gravity);
                 lastGroundedTime = float.NegativeInfinity;
@@ -77,7 +90,7 @@ namespace Thaka.Platformer.Player
             }
 
             var gravity = config.Gravity;
-            if (velocity.y > 0f && !input.JumpHeld)
+            if (velocity.y > 0f && !input.JumpHeld && !IsControlLocked)
                 gravity *= config.JumpCutGravityMultiplier;
 
             velocity.y = Mathf.Max(velocity.y + gravity * Time.deltaTime, -config.MaxFallSpeed);
@@ -85,7 +98,7 @@ namespace Thaka.Platformer.Player
 
         void UpdateFacing()
         {
-            if (Mathf.Abs(input.Move) > 0.01f)
+            if (!IsControlLocked && Mathf.Abs(input.Move) > 0.01f)
                 transform.rotation = Quaternion.LookRotation(input.Move > 0f ? Vector3.right : Vector3.left);
         }
     }
