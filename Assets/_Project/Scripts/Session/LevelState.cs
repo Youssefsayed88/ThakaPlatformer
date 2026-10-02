@@ -63,6 +63,11 @@ namespace Thaka.Platformer.Session
                 Died?.Invoke();
         }
 
+        public void Kill()
+        {
+            TakeHit(Hp);
+        }
+
         public void SetCheckpoint(string checkpointId)
         {
             CheckpointId = checkpointId;
@@ -83,13 +88,13 @@ namespace Thaka.Platformer.Session
             };
         }
 
-        public void Restore(SaveData snapshot, bool restoreHp)
+        public void Restore(SaveData snapshot)
         {
             if (snapshot == null)
                 throw new ArgumentNullException(nameof(snapshot));
 
             CheckpointId = snapshot.checkpointId;
-            Hp = restoreHp ? Mathf.Clamp(snapshot.hp, 1, MaxHp) : MaxHp;
+            Hp = Mathf.Clamp(snapshot.hp, 1, MaxHp);
             Coins = snapshot.coins;
 
             collectedCoinIds.Clear();

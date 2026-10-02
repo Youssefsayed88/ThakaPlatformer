@@ -21,6 +21,16 @@ namespace Thaka.Platformer.Tests
         }
 
         [Test]
+        public void Kill_DiesFromFullHp()
+        {
+            var state = new LevelState(4);
+
+            state.Kill();
+
+            Assert.IsTrue(state.IsDead);
+        }
+
+        [Test]
         public void SameCoin_CountsOnce()
         {
             var state = new LevelState(4);
@@ -41,7 +51,7 @@ namespace Thaka.Platformer.Tests
             var snapshot = state.CreateSnapshot(Vector3.zero, 0f);
 
             var restored = new LevelState(4);
-            restored.Restore(snapshot, restoreHp: true);
+            restored.Restore(snapshot);
 
             Assert.AreEqual(3, restored.Hp);
             Assert.AreEqual(1, restored.Coins);
@@ -50,15 +60,17 @@ namespace Thaka.Platformer.Tests
         }
 
         [Test]
-        public void Respawn_RefillsHp()
+        public void RestoreAfterDeath_BringsBackCheckpointHp()
         {
             var state = new LevelState(4);
             state.TakeHit();
             var snapshot = state.CreateSnapshot(Vector3.zero, 0f);
+            state.Kill();
 
-            state.Restore(snapshot, restoreHp: false);
+            state.Restore(snapshot);
 
-            Assert.AreEqual(4, state.Hp);
+            Assert.AreEqual(3, state.Hp);
+            Assert.IsFalse(state.IsDead);
         }
     }
 }

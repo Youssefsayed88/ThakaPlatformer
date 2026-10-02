@@ -31,7 +31,7 @@ namespace Thaka.Platformer.Core
 
         public static void RespawnAtLastCheckpoint()
         {
-            LoadLevel(SaveService.HasSave ? LaunchMode.Respawn : LaunchMode.NewGame);
+            LoadLevel(SaveService.HasSave ? LaunchMode.Continue : LaunchMode.NewGame);
         }
 
         public static void CompleteLevel()
