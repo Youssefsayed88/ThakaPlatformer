@@ -16,6 +16,11 @@ namespace Thaka.Platformer.Config
         [Tooltip("How long movement input is ignored after being hit.")]
         [SerializeField, Min(0f)] float knockbackControlLockSeconds = 0.25f;
 
+        [Header("Stomp")]
+        [SerializeField, Min(0f)] float stompBounceHeight = 1.8f;
+        [Tooltip("How far below an enemy's top the player's feet can be and still count as a stomp.")]
+        [SerializeField, Min(0f)] float stompTolerance = 0.35f;
+
         [Header("Movement")]
         [SerializeField, Min(0f)] float moveSpeed = 7f;
         [SerializeField, Min(0f)] float groundAcceleration = 70f;
@@ -36,6 +41,8 @@ namespace Thaka.Platformer.Config
         public float KnockbackSpeed => knockbackSpeed;
         public float KnockbackUpSpeed => knockbackUpSpeed;
         public float KnockbackControlLockSeconds => knockbackControlLockSeconds;
+        public float StompBounceHeight => stompBounceHeight;
+        public float StompTolerance => stompTolerance;
         public float MoveSpeed => moveSpeed;
         public float GroundAcceleration => groundAcceleration;
         public float AirAcceleration => airAcceleration;

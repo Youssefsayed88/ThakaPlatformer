@@ -57,6 +57,13 @@ namespace Thaka.Platformer.Player
             velocity = Vector3.zero;
         }
 
+        public void Bounce(float height)
+        {
+            velocity.y = Mathf.Sqrt(2f * height * -config.Gravity);
+            lastGroundedTime = float.NegativeInfinity;
+            lastJumpPressedTime = float.NegativeInfinity;
+        }
+
         public void ApplyKnockback(float directionX)
         {
             velocity.x = Mathf.Sign(directionX) * config.KnockbackSpeed;

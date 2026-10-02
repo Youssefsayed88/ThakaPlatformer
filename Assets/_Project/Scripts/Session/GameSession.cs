@@ -1,5 +1,6 @@
 using Thaka.Platformer.Config;
 using Thaka.Platformer.Core;
+using Thaka.Platformer.Enemies;
 using Thaka.Platformer.Persistence;
 using Thaka.Platformer.Player;
 using UnityEngine;
@@ -30,6 +31,8 @@ namespace Thaka.Platformer.Session
 
         void Start()
         {
+            BindEnemies();
+
             if (loadedSnapshot != null)
                 player.Teleport(loadedSnapshot.playerPosition, loadedSnapshot.playerYaw);
             else
@@ -51,6 +54,23 @@ namespace Thaka.Platformer.Session
         public void CompleteLevel()
         {
             GameFlow.CompleteLevel();
+        }
+
+        void BindEnemies()
+        {
+            foreach (var enemy in FindObjectsByType<EnemyController>(FindObjectsSortMode.None))
+            {
+                if (State.IsEnemyDefeated(enemy.Id))
+                    enemy.gameObject.SetActive(false);
+                else
+                    enemy.Defeated += OnEnemyDefeated;
+            }
+        }
+
+        void OnEnemyDefeated(EnemyController enemy)
+        {
+            enemy.Defeated -= OnEnemyDefeated;
+            State.TryDefeatEnemy(enemy.Id);
         }
     }
 }
