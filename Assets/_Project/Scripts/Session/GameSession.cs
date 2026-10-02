@@ -61,9 +61,14 @@ namespace Thaka.Platformer.Session
             foreach (var enemy in FindObjectsByType<EnemyController>(FindObjectsSortMode.None))
             {
                 if (State.IsEnemyDefeated(enemy.Id))
+                {
                     enemy.gameObject.SetActive(false);
-                else
-                    enemy.Defeated += OnEnemyDefeated;
+                    continue;
+                }
+
+                enemy.Defeated += OnEnemyDefeated;
+                if (enemy is ITargetSeeker seeker)
+                    seeker.SetTarget(player);
             }
         }
 

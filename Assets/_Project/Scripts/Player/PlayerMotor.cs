@@ -1,10 +1,11 @@
+using Thaka.Platformer.AI;
 using Thaka.Platformer.Config;
 using UnityEngine;
 
 namespace Thaka.Platformer.Player
 {
     [RequireComponent(typeof(CharacterController))]
-    public class PlayerMotor : MonoBehaviour
+    public class PlayerMotor : MonoBehaviour, ITarget
     {
         const float GroundedVelocity = -2f;
 
@@ -18,6 +19,7 @@ namespace Thaka.Platformer.Player
         float lastJumpPressedTime = float.NegativeInfinity;
         float controlLockedUntil = float.NegativeInfinity;
 
+        public Vector3 Position => transform.position;
         public Vector3 Velocity => velocity;
         public bool IsGrounded => controller.isGrounded;
         bool IsControlLocked => Time.time < controlLockedUntil;

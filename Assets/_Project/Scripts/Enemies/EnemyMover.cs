@@ -11,6 +11,7 @@ namespace Thaka.Platformer.Enemies
             this.transform = transform;
         }
 
+        public float X => transform.position.x;
         public bool IsFacingRight => transform.forward.x >= 0f;
 
         // Returns true once the target has been reached
