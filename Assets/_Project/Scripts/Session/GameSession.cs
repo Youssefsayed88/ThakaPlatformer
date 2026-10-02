@@ -18,10 +18,12 @@ namespace Thaka.Platformer.Session
         [SerializeField] PlayerConfig playerConfig;
         [SerializeField] PlayerMotor player;
         [SerializeField, Min(0f)] float levelCompleteDelaySeconds = 2.5f;
+        [SerializeField, Min(0f)] float respawnDelaySeconds = 0.8f;
 
         SaveData loadedSnapshot;
         Checkpoint[] checkpoints;
 
+        public event Action CheckpointReached;
         public event Action LevelCompleted;
 
         public LevelState State { get; private set; }
@@ -35,7 +37,7 @@ namespace Thaka.Platformer.Session
             if (GameFlow.PendingLaunch == LaunchMode.Continue && GameFlow.SaveService.TryLoad(out loadedSnapshot))
                 State.Restore(loadedSnapshot);
 
-            State.Died += GameFlow.RespawnAtLastCheckpoint;
+            State.Died += OnPlayerDied;
         }
 
         void Start()
@@ -54,7 +56,13 @@ namespace Thaka.Platformer.Session
 
         void OnDestroy()
         {
-            State.Died -= GameFlow.RespawnAtLastCheckpoint;
+            State.Died -= OnPlayerDied;
+        }
+
+        void OnPlayerDied()
+        {
+            FreezePlayer();
+            StartCoroutine(AfterDelay(respawnDelaySeconds, GameFlow.RespawnAtLastCheckpoint));
         }
 
         void BindEnemies()
@@ -118,6 +126,7 @@ namespace Thaka.Platformer.Session
             MarkReachedUpTo(checkpoint.X);
             State.SetCheckpoint(checkpoint.Id);
             Save(checkpoint.SpawnPosition);
+            CheckpointReached?.Invoke();
         }
 
         void MarkReachedUpTo(float x)
@@ -143,19 +152,24 @@ namespace Thaka.Platformer.Session
 
         void OnGoalReached()
         {
-            // Freeze the player and ignore deaths so nothing can interrupt the completion screen
-            State.Died -= GameFlow.RespawnAtLastCheckpoint;
-            player.enabled = false;
-            player.GetComponent<PlayerContactSensor>().enabled = false;
+            // Ignore deaths so nothing can interrupt the completion screen
+            State.Died -= OnPlayerDied;
+            FreezePlayer();
 
             LevelCompleted?.Invoke();
-            StartCoroutine(CompleteAfterDelay());
+            StartCoroutine(AfterDelay(levelCompleteDelaySeconds, GameFlow.CompleteLevel));
         }
 
-        IEnumerator CompleteAfterDelay()
+        void FreezePlayer()
         {
-            yield return new WaitForSeconds(levelCompleteDelaySeconds);
-            GameFlow.CompleteLevel();
+            player.enabled = false;
+            player.GetComponent<PlayerContactSensor>().enabled = false;
+        }
+
+        IEnumerator AfterDelay(float seconds, Action action)
+        {
+            yield return new WaitForSeconds(seconds);
+            action();
         }
 
         void Save(Vector3 playerPosition)
